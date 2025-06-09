@@ -57,9 +57,13 @@ export default function Home() {
           
           <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
             <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
-              <div className="relative pl-24 p-6 bg-gray-800/50 rounded-lg neon-border">
-                <dt className="text-base font-semibold leading-7 text-white">
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-lg bg-gray-700/50 p-2">
+              {/* Instagram Project Card */}
+              <a 
+                href="/instagram"
+                className="group relative pl-24 p-6 bg-gray-800/50 rounded-lg neon-border hover:bg-gray-700/50 transition-all duration-300 transform hover:scale-105 cursor-pointer"
+              >
+                <dt className="text-base font-semibold leading-7 text-white group-hover:text-purple-400 transition-colors">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-lg bg-gray-700/50 p-2 group-hover:bg-purple-500/20 transition-colors">
                     <Image
                       src="/logos/Instagram_Glyph_Gradient.png"
                       alt="Instagram"
@@ -70,14 +74,18 @@ export default function Home() {
                   </div>
                   Instagram Project
                 </dt>
-                <dd className="mt-2 text-base leading-7 text-gray-300">
+                <dd className="mt-2 text-base leading-7 text-gray-300 group-hover:text-gray-200 transition-colors">
                   Future integration with Cloudflare R2 for video upload and Instagram Graph API for automated content management.
                 </dd>
-              </div>
+              </a>
               
-              <div className="relative pl-24 p-6 bg-gray-800/50 rounded-lg neon-border">
-                <dt className="text-base font-semibold leading-7 text-white">
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-lg bg-gray-700/50 p-2">
+              {/* Facebook Project Card */}
+              <a 
+                href="/facebook"
+                className="group relative pl-24 p-6 bg-gray-800/50 rounded-lg neon-border hover:bg-gray-700/50 transition-all duration-300 transform hover:scale-105 cursor-pointer"
+              >
+                <dt className="text-base font-semibold leading-7 text-white group-hover:text-blue-400 transition-colors">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-lg bg-gray-700/50 p-2 group-hover:bg-blue-500/20 transition-colors">
                     <Image
                       src="/logos/Facebook_Logo_Primary.png"
                       alt="Facebook"
@@ -88,14 +96,18 @@ export default function Home() {
                   </div>
                   Facebook Project
                 </dt>
-                <dd className="mt-2 text-base leading-7 text-gray-300">
+                <dd className="mt-2 text-base leading-7 text-gray-300 group-hover:text-gray-200 transition-colors">
                   Complete Facebook integration with required compliance pages: Login, Privacy Policy, and Data Deletion.
                 </dd>
-              </div>
+              </a>
               
-              <div className="relative pl-24 p-6 bg-gray-800/50 rounded-lg neon-border">
-                <dt className="text-base font-semibold leading-7 text-white">
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-lg bg-gray-700/50 p-2">
+              {/* TikTok Project Card */}
+              <a 
+                href="/tiktok"
+                className="group relative pl-24 p-6 bg-gray-800/50 rounded-lg neon-border hover:bg-gray-700/50 transition-all duration-300 transform hover:scale-105 cursor-pointer"
+              >
+                <dt className="text-base font-semibold leading-7 text-white group-hover:text-pink-400 transition-colors">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-lg bg-gray-700/50 p-2 group-hover:bg-pink-500/20 transition-colors">
                     <Image
                       src="/logos/TikTok_Icon_Black_Square.png"
                       alt="TikTok"
@@ -106,14 +118,18 @@ export default function Home() {
                   </div>
                   TikTok Project
                 </dt>
-                <dd className="mt-2 text-base leading-7 text-gray-300">
+                <dd className="mt-2 text-base leading-7 text-gray-300 group-hover:text-gray-200 transition-colors">
                   TikTok integration platform with Login, Privacy Policy, and Terms of Service pages for API compliance.
                 </dd>
-              </div>
+              </a>
               
-              <div className="relative pl-24 p-6 bg-gray-800/50 rounded-lg neon-border">
-                <dt className="text-base font-semibold leading-7 text-white">
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-lg bg-gray-700/50 p-2">
+              {/* College Football Project Card */}
+              <a 
+                href="/college-football"
+                className="group relative pl-24 p-6 bg-gray-800/50 rounded-lg neon-border hover:bg-gray-700/50 transition-all duration-300 transform hover:scale-105 cursor-pointer"
+              >
+                <dt className="text-base font-semibold leading-7 text-white group-hover:text-orange-400 transition-colors">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-lg bg-gray-700/50 p-2 group-hover:bg-orange-500/20 transition-colors">
                     <Image
                       src="/logos/college-football-logo.png"
                       alt="College Football"
@@ -124,10 +140,10 @@ export default function Home() {
                   </div>
                   College Football Model
                 </dt>
-                <dd className="mt-2 text-base leading-7 text-gray-300">
+                <dd className="mt-2 text-base leading-7 text-gray-300 group-hover:text-gray-200 transition-colors">
                   Dynamic PostgreSQL-powered analytics platform for College Football data with flexible visualizations.
                 </dd>
-              </div>
+              </a>
             </dl>
           </div>
         </div>
