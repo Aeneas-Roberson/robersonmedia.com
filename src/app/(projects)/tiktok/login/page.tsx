@@ -9,6 +9,11 @@ function TikTokLoginContent() {
   const [error, setError] = useState<string>("");
   const searchParams = useSearchParams();
 
+  // TEMPORARY DEBUGGING: Log the Client ID as seen by the frontend
+  useEffect(() => {
+    console.log("NEXT_PUBLIC_TIKTOK_CLIENT_ID (from frontend):", process.env.NEXT_PUBLIC_TIKTOK_CLIENT_ID);
+  }, []);
+
   // Handle authorization code from redirect
   useEffect(() => {
     const code = searchParams.get('code');
