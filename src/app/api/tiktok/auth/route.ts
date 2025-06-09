@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Authorization code is required' },
         { status: 400 }
-      );
+      );  
     }
 
     const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_ID;
