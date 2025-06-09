@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 
 export async function POST(request: NextRequest) {
   try {
@@ -30,26 +31,19 @@ export async function POST(request: NextRequest) {
 
     const instagramUserId = userData.id;
 
-    // Step 1: Create media container for video
-    const videoBuffer = await videoFile.arrayBuffer();
-    const videoBase64 = Buffer.from(videoBuffer).toString('base64');
+    // Step 1: Upload video to cloud storage first
+    const videoUrl = await uploadVideoToCloudStorage(videoFile);
     
-    // Note: For large videos, you should upload to a cloud storage first
-    // and provide the video_url instead of uploading directly
-    
+    // Step 2: Create media container for video
     const containerParams = new URLSearchParams({
       media_type: 'VIDEO',
+      video_url: videoUrl,
       access_token: accessToken,
     });
 
     if (caption) {
       containerParams.append('caption', caption);
     }
-
-    // For this example, we'll assume you have the video uploaded to a publicly accessible URL
-    // In production, you should upload to cloud storage (AWS S3, Cloudflare R2, etc.) first
-    const videoUrl = await uploadVideoToCloudStorage(videoFile);
-    containerParams.append('video_url', videoUrl);
 
     const containerResponse = await fetch(
       `https://graph.instagram.com/v18.0/${instagramUserId}/media`,
@@ -74,7 +68,7 @@ export async function POST(request: NextRequest) {
 
     const containerId = containerData.id;
 
-    // Step 2: Check container status (required for videos)
+    // Step 3: Check container status (required for videos)
     let containerStatus = 'IN_PROGRESS';
     let attempts = 0;
     const maxAttempts = 30; // Max 5 minutes (30 * 10 seconds)
@@ -102,7 +96,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 3: Publish the media
+    // Step 4: Publish the media
     const publishResponse = await fetch(
       `https://graph.instagram.com/v18.0/${instagramUserId}/media_publish`,
       {
@@ -144,24 +138,70 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Mock function for cloud storage upload
-// Replace this with your actual cloud storage implementation
+// Cloud storage upload function (Cloudflare R2 / AWS S3 compatible)
 async function uploadVideoToCloudStorage(videoFile: File): Promise<string> {
-  // TODO: Implement actual cloud storage upload
-  // Example with Cloudflare R2, AWS S3, or similar service
-  
-  // For now, return a placeholder URL
-  // In production, you would:
-  // 1. Upload the video to your cloud storage
-  // 2. Return the public URL
-  
-  const fileName = `instagram-video-${Date.now()}.mp4`;
-  
-  // Mock implementation - replace with actual upload logic
-  console.log(`Uploading video: ${fileName}, size: ${videoFile.size} bytes`);
-  
-  // This should be replaced with actual cloud storage upload
-  return `https://your-cloud-storage.com/videos/${fileName}`;
+  try {
+    // Check if cloud storage is configured
+    const accessKeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID;
+    const secretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY;
+    const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME || process.env.AWS_BUCKET_NAME;
+    const endpoint = process.env.CLOUDFLARE_R2_ENDPOINT;
+    const region = process.env.AWS_REGION || 'auto';
+
+    if (!accessKeyId || !secretAccessKey || !bucketName) {
+      throw new Error('Cloud storage credentials not configured. Please set up Cloudflare R2 or AWS S3 environment variables.');
+    }
+
+    // Configure S3 client (works with both AWS S3 and Cloudflare R2)
+    const s3Client = new S3Client({
+      region: region,
+      endpoint: endpoint, // For Cloudflare R2, this is required
+      credentials: {
+        accessKeyId: accessKeyId,
+        secretAccessKey: secretAccessKey,
+      },
+      // For Cloudflare R2, force path style
+      forcePathStyle: !!endpoint,
+    });
+
+    // Generate unique filename
+    const timestamp = Date.now();
+    const fileExtension = videoFile.name.split('.').pop() || 'mp4';
+    const fileName = `instagram-videos/${timestamp}-${Math.random().toString(36).substring(2)}.${fileExtension}`;
+
+    // Convert File to Buffer
+    const videoBuffer = Buffer.from(await videoFile.arrayBuffer());
+
+    // Upload to cloud storage
+    const uploadCommand = new PutObjectCommand({
+      Bucket: bucketName,
+      Key: fileName,
+      Body: videoBuffer,
+      ContentType: videoFile.type || 'video/mp4',
+      // Make the file publicly accessible
+      ACL: 'public-read',
+    });
+
+    await s3Client.send(uploadCommand);
+
+    // Construct the public URL
+    let publicUrl: string;
+    if (endpoint) {
+      // Cloudflare R2 public URL
+      const baseUrl = endpoint.replace('r2.cloudflarestorage.com', 'pub.r2.dev');
+      publicUrl = `${baseUrl}/${fileName}`;
+    } else {
+      // AWS S3 public URL
+      publicUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${fileName}`;
+    }
+
+    console.log(`Video uploaded successfully: ${publicUrl}`);
+    return publicUrl;
+
+  } catch (error) {
+    console.error('Cloud storage upload error:', error);
+    throw new Error(`Failed to upload video to cloud storage: ${error}`);
+  }
 }
 
 // Handle GET requests (for testing)
@@ -173,7 +213,15 @@ export async function GET() {
     requirements: [
       'Video file (MP4 format recommended)',
       'Instagram Business access token',
-      'Optional caption text'
-    ]
+      'Optional caption text',
+      'Cloud storage configured (Cloudflare R2 or AWS S3)'
+    ],
+    cloudStorage: {
+      configured: !!(
+        (process.env.CLOUDFLARE_R2_ACCESS_KEY_ID && process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY && process.env.CLOUDFLARE_R2_BUCKET_NAME) ||
+        (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY && process.env.AWS_BUCKET_NAME)
+      ),
+      type: process.env.CLOUDFLARE_R2_ENDPOINT ? 'Cloudflare R2' : 'AWS S3'
+    }
   });
 } 
