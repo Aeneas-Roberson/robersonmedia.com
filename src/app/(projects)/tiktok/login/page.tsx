@@ -9,66 +9,53 @@ function TikTokLoginContent() {
   const [error, setError] = useState<string>("");
   const searchParams = useSearchParams();
 
-  // Re-deploying after confirming Vercel Production Env Var scope
-
-  // Handle authorization code from redirect
+  // Handle callback results from the callback page
   useEffect(() => {
-    const code = searchParams.get('code');
+    const success = searchParams.get('success');
     const error = searchParams.get('error');
-    const errorDescription = searchParams.get('error_description');
+    const userData = searchParams.get('user');
 
-    if (error) {
-      setError(errorDescription || error);
-    } else if (code) {
-      exchangeCodeForToken(code);
-    }
-  }, [searchParams]);
-
-  const exchangeCodeForToken = async (code: string) => {
-    setIsLoading(true);
-    setError(""); // Clear previous errors
-    try {
-      const response = await fetch('/api/tiktok/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code }), // Send the authorization code to the backend
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setUserInfo(data.user); // data.user should contain open_id, username, display_name, avatar_url
-        // Store tokens securely if needed for subsequent API calls from client (not usually recommended)
-        // e.g., localStorage.setItem('tiktok_access_token', data.accessToken);
-        // It's often better to handle API calls requiring tokens via your backend to keep tokens secure.
-        console.log("TikTok authentication successful:", data);
-      } else {
-        setError(data.error || 'Authentication failed during token exchange.');
-        console.error("TikTok token exchange error from backend:", data);
+    if (success === 'true' && userData) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userData));
+        setUserInfo(user);
+        setError("");
+        // Clean the URL
+        window.history.replaceState({}, document.title, "/tiktok/login");
+      } catch (err) {
+        console.error('Error parsing user data:', err);
+        setError('Failed to process login data');
       }
-    } catch (err: any) {
-      setError('Network error or unexpected issue during token exchange.');
-      console.error("Network/unexpected error in exchangeCodeForToken:", err);
-    } finally {
-      setIsLoading(false);
+    } else if (error) {
+      const errorMessage = decodeURIComponent(error);
+      setError(errorMessage === 'network_error' 
+        ? 'Network error occurred during authentication'
+        : errorMessage === 'invalid_state'
+        ? 'Invalid authentication state - please try again'
+        : errorMessage === 'no_authorization_code'
+        ? 'No authorization code received from TikTok'
+        : errorMessage
+      );
       // Clean the URL
       window.history.replaceState({}, document.title, "/tiktok/login");
     }
-  };
+  }, [searchParams]);
 
   const handleLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_ID;
-    const redirectUri = encodeURIComponent(`${window.location.origin}/tiktok/login`);
+    const redirectUri = encodeURIComponent(`${window.location.origin}/tiktok/callback`);
     const scope = encodeURIComponent('user.info.basic,user.info.profile');
+    const state = 'tiktok_login';
     
     if (!clientId || clientId === 'your_tiktok_client_id_here') {
       setError('TikTok Client ID is not configured. Please check your environment variables.');
       return;
     }
     
-    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientId}&scope=${scope}&response_type=code&redirect_uri=${redirectUri}&state=tiktok_login`;
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientId}&scope=${scope}&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
+    
+    console.log('Redirect URI:', redirectUri);
+    console.log('Generated auth URL:', authUrl);
     
     window.location.href = authUrl;
   };
@@ -77,7 +64,6 @@ function TikTokLoginContent() {
     setUserInfo(null);
     setError("");
     // Clear URL parameters
-    // localStorage.removeItem('tiktok_access_token'); // Clear token if stored
     window.history.replaceState({}, document.title, "/tiktok/login");
   };
 
@@ -210,6 +196,13 @@ function TikTokLoginContent() {
                       <li>• Professional dashboard access</li>
                       <li>• Business integration tools</li>
                     </ul>
+                  </div>
+
+                  <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
+                    <h4 className="text-yellow-400 font-semibold mb-2">Callback URL:</h4>
+                    <p className="text-gray-400 text-sm font-mono">
+                      {`${window.location.origin}/tiktok/callback`}
+                    </p>
                   </div>
                 </div>
 

@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_ID;
     const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/tiktok/login`;
+    const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/tiktok/callback`;
 
     if (!clientKey || clientKey === 'your_tiktok_client_id_here') {
       console.error('TikTok Client Key not configured in environment variables.');
@@ -29,6 +29,9 @@ export async function POST(request: NextRequest) {
         { status: 500 }
       );
     }
+
+    console.log('Token exchange - Redirect URI:', redirectUri);
+    console.log('Token exchange - Authorization code:', code);
 
     const tokenParams = new URLSearchParams({
       client_key: clientKey,
@@ -78,6 +81,7 @@ export async function POST(request: NextRequest) {
       const userInfoData = await userInfoResponse.json();
       if (userInfoData.data && userInfoData.data.user) {
         userData = { ...userData, ...userInfoData.data.user };
+        console.log('TikTok user info retrieved successfully:', userData);
       } else {
          console.warn("User info came back in an unexpected format or was empty:", userInfoData);
       }
@@ -90,7 +94,7 @@ export async function POST(request: NextRequest) {
     // Associate them with your internal user ID.
     // Consider encrypting tokens at rest.
 
-    console.log('TikTok user authenticated:', open_id);
+    console.log('TikTok user authenticated successfully:', open_id);
 
     return NextResponse.json({
       user: userData, // contains open_id, and potentially avatar_url, display_name if scope allows and call succeeds
@@ -117,6 +121,7 @@ export async function GET() {
     message: 'TikTok Authentication Callback Endpoint',
     status: 'active',
     timestamp: new Date().toISOString(),
-    instructions: "This endpoint is for POST requests from the TikTok login page to exchange an auth code for an access token."
+    instructions: "This endpoint is for POST requests from the TikTok callback page to exchange an auth code for an access token.",
+    redirectUri: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/tiktok/callback`
   });
 } 
