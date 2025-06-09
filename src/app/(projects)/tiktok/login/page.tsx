@@ -49,7 +49,7 @@ function TikTokLoginContent() {
   const handleLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_ID;
     const redirectUri = encodeURIComponent(`${window.location.origin}/tiktok/callback/`);
-    const scope = encodeURIComponent('user.info.basic,user.info.profile');
+    const scope = encodeURIComponent('user.info.basic');
     const state = generateState();
     
     if (!clientId || clientId === 'your_tiktok_client_id_here') {
