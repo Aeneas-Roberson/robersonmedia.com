@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
-    const { code, code_verifier } = await request.json();
+    const { code } = await request.json();
 
     if (!code) {
       return NextResponse.json(
@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
     console.log('Token exchange - Redirect URI:', redirectUri);
     console.log('Token exchange - Authorization code:', code);
 
+    // Web app token exchange (no PKCE required)
     const tokenParams = new URLSearchParams({
       client_key: clientKey,
       client_secret: clientSecret,
@@ -40,11 +41,6 @@ export async function POST(request: NextRequest) {
       grant_type: 'authorization_code',
       redirect_uri: redirectUri,
     });
-    
-    // If you were using PKCE, you would include the code_verifier
-    // if (code_verifier) {
-    //   tokenParams.append('code_verifier', code_verifier);
-    // }
 
     const tokenResponse = await fetch('https://open.tiktokapis.com/v2/oauth/token/', {
       method: 'POST',
@@ -66,10 +62,7 @@ export async function POST(request: NextRequest) {
 
     const { access_token, refresh_token, open_id, scope, expires_in, refresh_expires_in } = tokenData;
 
-    // Optionally, fetch user info
-    // Note: The user.info.basic scope should grant access to this.
-    // If you request user.info.profile, you can get more details like avatar, display_name etc.
-    // Ensure your app has requested and been granted the necessary scopes.
+    // Fetch user info with the access token
     const userInfoResponse = await fetch(`https://open.tiktokapis.com/v2/user/info/?fields=open_id,union_id,avatar_url,display_name,username`, {
       headers: {
         'Authorization': `Bearer ${access_token}`,
@@ -122,6 +115,7 @@ export async function GET() {
     status: 'active',
     timestamp: new Date().toISOString(),
     instructions: "This endpoint is for POST requests from the TikTok callback page to exchange an auth code for an access token.",
-    redirectUri: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/tiktok/callback`
+    redirectUri: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/tiktok/callback`,
+    appType: 'Web App (No PKCE required)'
   });
 } 

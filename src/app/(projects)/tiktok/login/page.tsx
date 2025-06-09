@@ -41,20 +41,29 @@ function TikTokLoginContent() {
     }
   }, [searchParams]);
 
+  // Generate random state for CSRF protection
+  const generateState = () => {
+    return Math.random().toString(36).substring(2) + Math.random().toString(36).substring(2);
+  };
+
   const handleLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_ID;
     const redirectUri = encodeURIComponent(`${window.location.origin}/tiktok/callback`);
     const scope = encodeURIComponent('user.info.basic,user.info.profile');
-    const state = 'tiktok_login';
+    const state = generateState();
     
     if (!clientId || clientId === 'your_tiktok_client_id_here') {
       setError('TikTok Client ID is not configured. Please check your environment variables.');
       return;
     }
     
-    const authUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientId}&scope=${scope}&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
+    // Store state for validation in callback
+    sessionStorage.setItem('tiktok_oauth_state', state);
     
-    console.log('Redirect URI:', redirectUri);
+    // Web app format - NO PKCE required
+    const authUrl = `https://www.tiktok.com/v2/auth/authorize?client_key=${clientId}&scope=${scope}&response_type=code&redirect_uri=${redirectUri}&state=${state}`;
+    
+    console.log('Redirect URI:', decodeURIComponent(redirectUri));
     console.log('Generated auth URL:', authUrl);
     
     window.location.href = authUrl;
@@ -63,7 +72,7 @@ function TikTokLoginContent() {
   const handleLogout = () => {
     setUserInfo(null);
     setError("");
-    // Clear URL parameters
+    // Clean the URL
     window.history.replaceState({}, document.title, "/tiktok/login");
   };
 
@@ -199,9 +208,12 @@ function TikTokLoginContent() {
                   </div>
 
                   <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
-                    <h4 className="text-yellow-400 font-semibold mb-2">Callback URL:</h4>
+                    <h4 className="text-yellow-400 font-semibold mb-2">Callback URL (Web App):</h4>
                     <p className="text-gray-400 text-sm font-mono">
                       {`${window.location.origin}/tiktok/callback`}
+                    </p>
+                    <p className="text-gray-400 text-xs mt-2">
+                      ✓ No PKCE required for web apps
                     </p>
                   </div>
                 </div>
