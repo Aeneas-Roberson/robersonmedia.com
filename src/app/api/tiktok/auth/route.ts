@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
 
     const clientKey = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_ID;
     const clientSecret = process.env.TIKTOK_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/tiktok/callback`;
+    const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/tiktok/callback/`;
 
     if (!clientKey || clientKey === 'your_tiktok_client_id_here') {
       console.error('TikTok Client Key not configured in environment variables.');
@@ -115,7 +115,7 @@ export async function GET() {
     status: 'active',
     timestamp: new Date().toISOString(),
     instructions: "This endpoint is for POST requests from the TikTok callback page to exchange an auth code for an access token.",
-    redirectUri: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/tiktok/callback`,
+    redirectUri: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/tiktok/callback/`,
     appType: 'Web App (No PKCE required)'
   });
 } 

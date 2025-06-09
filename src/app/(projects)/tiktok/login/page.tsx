@@ -48,7 +48,7 @@ function TikTokLoginContent() {
 
   const handleLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_TIKTOK_CLIENT_ID;
-    const redirectUri = encodeURIComponent(`${window.location.origin}/tiktok/callback`);
+    const redirectUri = encodeURIComponent(`${window.location.origin}/tiktok/callback/`);
     const scope = encodeURIComponent('user.info.basic,user.info.profile');
     const state = generateState();
     
@@ -210,7 +210,7 @@ function TikTokLoginContent() {
                   <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
                     <h4 className="text-yellow-400 font-semibold mb-2">Callback URL (Web App):</h4>
                     <p className="text-gray-400 text-sm font-mono">
-                      {`${window.location.origin}/tiktok/callback`}
+                      {`${window.location.origin}/tiktok/callback/`}
                     </p>
                     <p className="text-gray-400 text-xs mt-2">
                       ✓ No PKCE required for web apps
