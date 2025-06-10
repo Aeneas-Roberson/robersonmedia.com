@@ -54,7 +54,7 @@ function Navigation() {
         {/* Logo */}
         <a href="/" className="text-2xl font-bold">
           <span className="bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-            RobersonMedia
+            robersonmedia.com
           </span>
         </a>
 
