@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <div className="bg-white">
       {/* Hero Section with Cyber Background */}
-      <div className="relative cyber-bg min-h-screen flex items-center">
+      <div className="relative cyber-bg min-h-[83.33vh] flex items-center">
         {/* Floating Particles */}
         <div className="particles">
           <div className="particle" style={{ left: '10%', animationDelay: '0s' }}></div>
@@ -18,12 +18,12 @@ export default function Home() {
           <div className="particle" style={{ left: '90%', animationDelay: '-8s' }}></div>
         </div>
         
-        <div className="relative z-10 mx-auto max-w-2xl py-32 px-6 text-center">
+        <div className="relative z-10 mx-auto max-w-2xl py-16 px-6 text-center">
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl mb-6">
             <span className="neon-text-subtle">robersonmedia.com</span>
           </h1>
           <p className="text-lg leading-8 text-cyan-100 mb-10">
-            A place for me to host all of my projects. Currently hosting ways to upload to Facebook, Instagram, and Tiktok. Coming soon: College Football Predictive Model
+            A place for me to host all of my projects. Currently hosting ways to upload to Facebook, Instagram, Twitter, and Tiktok. Coming soon: College Football Predictive Model
           </p>
           <div className="flex items-center justify-center gap-x-6">
             <a
@@ -55,7 +55,7 @@ export default function Home() {
             </p>
           </div>
           
-          <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
+          <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
             <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
               {/* Instagram Project Card */}
               <a 
@@ -98,6 +98,28 @@ export default function Home() {
                 </dt>
                 <dd className="mt-2 text-base leading-7 text-gray-300 group-hover:text-gray-200 transition-colors">
                   Complete Facebook integration with required compliance pages: Login, Privacy Policy, and Data Deletion.
+                </dd>
+              </a>
+              
+              {/* Twitter Project Card */}
+              <a 
+                href="/twitter"
+                className="group relative pl-24 p-6 bg-gray-800/50 rounded-lg neon-border hover:bg-gray-700/50 transition-all duration-300 transform hover:scale-105 cursor-pointer"
+              >
+                <dt className="text-base font-semibold leading-7 text-white group-hover:text-cyan-400 transition-colors">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 flex h-14 w-14 items-center justify-center rounded-lg bg-gray-700/50 p-2 group-hover:bg-cyan-500/20 transition-colors">
+                    <svg 
+                      className="w-10 h-10 text-cyan-400" 
+                      fill="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                  </div>
+                  Twitter Project
+                </dt>
+                <dd className="mt-2 text-base leading-7 text-gray-300 group-hover:text-gray-200 transition-colors">
+                  Twitter OAuth 2.0 integration with PKCE for secure authentication, content posting, and analytics dashboard.
                 </dd>
               </a>
               
@@ -145,6 +167,22 @@ export default function Home() {
                 </dd>
               </a>
             </dl>
+          </div>
+        </div>
+      </div>
+
+      {/* About Section */}
+      <div id="about" className="py-24 sm:py-32 bg-gray-800">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl lg:text-center">
+            <h2 className="text-base font-semibold leading-7 text-cyan-400">About</h2>
+            <p className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Built by developers, for developers
+            </p>
+            <p className="mt-6 text-lg leading-8 text-gray-300">
+              Our platform provides robust API integrations and automation tools to streamline your social media workflow 
+              and sports analytics needs.
+            </p>
           </div>
         </div>
       </div>
