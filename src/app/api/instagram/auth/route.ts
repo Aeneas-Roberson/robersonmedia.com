@@ -15,18 +15,21 @@ export async function POST(request: NextRequest) {
     console.log('[Instagram Auth API] Server-side redirect_uri for token exchange:', serverSideRedirectUri);
 
     // Exchange authorization code for access token
+    const requestBody = new URLSearchParams({
+      client_id: process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID!,
+      client_secret: process.env.INSTAGRAM_CLIENT_SECRET!,
+      grant_type: 'authorization_code',
+      redirect_uri: serverSideRedirectUri,
+      code: code,
+    });
+    console.log('[Instagram Auth API] Token exchange request body:', requestBody.toString());
+
     const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: new URLSearchParams({
-        client_id: process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID!,
-        client_secret: process.env.INSTAGRAM_CLIENT_SECRET!,
-        grant_type: 'authorization_code',
-        redirect_uri: serverSideRedirectUri,
-        code: code,
-      }),
+      body: requestBody,
     });
 
     const tokenData = await tokenResponse.json();
