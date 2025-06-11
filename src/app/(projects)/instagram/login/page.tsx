@@ -58,6 +58,8 @@ function InstagramLoginContent() {
     // Debug logging
     console.log('Client ID from env:', clientId);
     console.log('All env vars:', process.env);
+    console.log('Client-side Raw redirect_uri before encoding:', `${appBaseUrl}/instagram/callback`);
+    console.log('Client-side Encoded redirect_uri for authUrl:', redirectUri);
     
     if (!clientId || clientId === 'your_instagram_client_id_here') {
       setError('Instagram Client ID is not configured. Please check your environment variables.');

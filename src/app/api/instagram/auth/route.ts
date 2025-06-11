@@ -11,6 +11,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const serverSideRedirectUri = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/instagram/callback`;
+    console.log('[Instagram Auth API] Server-side redirect_uri for token exchange:', serverSideRedirectUri);
+
     // Exchange authorization code for access token
     const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
       method: 'POST',
@@ -21,7 +24,7 @@ export async function POST(request: NextRequest) {
         client_id: process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID!,
         client_secret: process.env.INSTAGRAM_CLIENT_SECRET!,
         grant_type: 'authorization_code',
-        redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/instagram/callback`,
+        redirect_uri: serverSideRedirectUri,
         code: code,
       }),
     });
