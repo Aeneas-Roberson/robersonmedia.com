@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
         client_id: process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID!,
         client_secret: process.env.INSTAGRAM_CLIENT_SECRET!,
         grant_type: 'authorization_code',
-        redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/instagram/login`,
+        redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/instagram/callback`,
         code: code,
       }),
     });

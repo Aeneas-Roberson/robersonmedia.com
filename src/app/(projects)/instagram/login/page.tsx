@@ -9,49 +9,41 @@ function InstagramLoginContent() {
   const [error, setError] = useState<string>("");
   const searchParams = useSearchParams();
 
-  // Handle authorization code from redirect
+  // Handle results passed from the callback page
   useEffect(() => {
-    const code = searchParams.get('code');
-    const error = searchParams.get('error');
-    const errorDescription = searchParams.get('error_description');
+    const success = searchParams.get('success');
+    const errorParam = searchParams.get('error');
+    const userData = searchParams.get('user');
+    const accessToken = searchParams.get('token');
 
-    if (error) {
-      setError(errorDescription || error);
-    } else if (code) {
-      exchangeCodeForToken(code);
+    // Clear loading state if we came from callback, regardless of outcome
+    setIsLoading(false);
+
+    if (success === 'true' && userData) {
+      try {
+        const user = JSON.parse(decodeURIComponent(userData));
+        setUserInfo(user);
+        if (accessToken) {
+          localStorage.setItem('instagram_access_token', decodeURIComponent(accessToken));
+        }
+        setError("");
+        // Clean the URL
+        window.history.replaceState({}, document.title, "/instagram/login");
+      } catch (err) {
+        console.error('Error parsing user data from callback:', err);
+        setError('Failed to process login data from callback');
+      }
+    } else if (errorParam) {
+      const errorMessage = decodeURIComponent(errorParam);
+      setError(errorMessage);
+      // Clean the URL
+      window.history.replaceState({}, document.title, "/instagram/login");
     }
   }, [searchParams]);
 
-  const exchangeCodeForToken = async (code: string) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/instagram/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ code }),
-      });
-
-      const data = await response.json();
-      
-      if (response.ok) {
-        setUserInfo(data.user);
-        // Store token securely (you might want to use httpOnly cookies)
-        localStorage.setItem('instagram_access_token', data.access_token);
-      } else {
-        setError(data.error || 'Authentication failed');
-      }
-    } catch (err) {
-      setError('Network error occurred');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const handleLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID;
-    const redirectUri = encodeURIComponent(`${window.location.origin}/instagram/login`);
+    const redirectUri = encodeURIComponent(`${window.location.origin}/instagram/callback`);
     const scope = encodeURIComponent('instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish,instagram_business_manage_insights');
     
     // Debug logging
