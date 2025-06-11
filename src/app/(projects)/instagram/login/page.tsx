@@ -43,7 +43,15 @@ function InstagramLoginContent() {
 
   const handleLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID; // This should be 996082560734538
-    const redirectUri = encodeURIComponent(`${window.location.origin}/instagram/callback`);
+    // Ensure redirectUri matches exactly what's in Meta App Dashboard and sent by the backend
+    // Use NEXT_PUBLIC_BASE_URL as the source of truth for the domain.
+    const appBaseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+    if (!appBaseUrl) {
+      console.error("NEXT_PUBLIC_BASE_URL is not set!");
+      setError("Application base URL is not configured. Please contact support.");
+      return;
+    }
+    const redirectUri = encodeURIComponent(`${appBaseUrl}/instagram/callback`);
     // Scopes from the provided embed URL
     const scope = encodeURIComponent('instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish,instagram_business_manage_insights');
     
