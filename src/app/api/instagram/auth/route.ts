@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Exchange authorization code for access token
-    const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
+    const tokenResponse = await fetch('https://graph.facebook.com/v23.0/oauth/access_token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     // Get long-lived access token
     const longLivedTokenResponse = await fetch(
-      `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${process.env.INSTAGRAM_CLIENT_SECRET}&access_token=${access_token}`,
+      `https://graph.facebook.com/v23.0/oauth/access_token?grant_type=fb_exchange_token&client_secret=${process.env.INSTAGRAM_CLIENT_SECRET}&fb_exchange_token=${access_token}`,
       { method: 'GET' }
     );
 

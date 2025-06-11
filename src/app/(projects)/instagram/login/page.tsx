@@ -44,7 +44,7 @@ function InstagramLoginContent() {
   const handleLogin = () => {
     const clientId = process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID;
     const redirectUri = encodeURIComponent(`${window.location.origin}/instagram/callback`);
-    const scope = encodeURIComponent('instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish,instagram_business_manage_insights');
+    const scope = encodeURIComponent('instagram_basic,pages_show_list,instagram_content_publish,business_management,instagram_manage_messages,instagram_manage_comments,instagram_manage_insights,pages_read_engagement');
     
     // Debug logging
     console.log('Client ID from env:', clientId);
@@ -55,7 +55,7 @@ function InstagramLoginContent() {
       return;
     }
     
-    const authUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
+    const authUrl = `https://www.facebook.com/v23.0/dialog/oauth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
     
     console.log('Generated auth URL:', authUrl);
     window.location.href = authUrl;
