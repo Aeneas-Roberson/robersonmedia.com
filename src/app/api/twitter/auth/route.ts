@@ -4,6 +4,13 @@ export async function POST(request: NextRequest) {
   try {
     const { code, code_verifier } = await request.json();
 
+    console.log('Twitter auth request received:', { 
+      hasCode: !!code, 
+      hasCodeVerifier: !!code_verifier,
+      codeLength: code?.length,
+      verifierLength: code_verifier?.length 
+    });
+
     if (!code) {
       return NextResponse.json(
         { error: 'Authorization code is required' },
@@ -20,7 +27,17 @@ export async function POST(request: NextRequest) {
 
     const clientId = process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID;
     const clientSecret = process.env.TWITTER_CLIENT_SECRET;
-    const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com'}/twitter/callback`;
+    // Fix: Use localhost for development, production URL for production
+    const baseUrl = process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:3000' 
+      : (process.env.NEXT_PUBLIC_BASE_URL || 'https://robersonmedia.com');
+    const redirectUri = `${baseUrl}/twitter/callback`;
+
+    console.log('Twitter config:', {
+      hasClientId: !!clientId,
+      hasClientSecret: !!clientSecret,
+      redirectUri: redirectUri
+    });
 
     if (!clientId || clientId === 'your_twitter_client_id_here') {
       console.error('Twitter Client ID not configured in environment variables.');
@@ -49,8 +66,12 @@ export async function POST(request: NextRequest) {
       code_verifier: code_verifier,
     });
 
-    console.log('Token exchange - Redirect URI:', redirectUri);
-    console.log('Token exchange - Authorization code:', code);
+    console.log('Token exchange request:', {
+      url: 'https://api.twitter.com/2/oauth2/token',
+      method: 'POST',
+      redirectUri: redirectUri,
+      grantType: 'authorization_code'
+    });
 
     const tokenResponse = await fetch('https://api.twitter.com/2/oauth2/token', {
       method: 'POST',
@@ -63,6 +84,15 @@ export async function POST(request: NextRequest) {
 
     const tokenData = await tokenResponse.json();
 
+    console.log('Twitter token response:', {
+      ok: tokenResponse.ok,
+      status: tokenResponse.status,
+      statusText: tokenResponse.statusText,
+      hasAccessToken: !!tokenData.access_token,
+      error: tokenData.error,
+      errorDescription: tokenData.error_description
+    });
+
     if (!tokenResponse.ok) {
       console.error('Twitter token exchange error:', tokenData);
       return NextResponse.json(
@@ -73,6 +103,8 @@ export async function POST(request: NextRequest) {
 
     const { access_token, refresh_token, expires_in } = tokenData;
 
+    console.log('Token exchange successful, fetching user data...');
+
     // Fetch user information using the access token
     const userResponse = await fetch('https://api.twitter.com/2/users/me?user.fields=id,username,name,profile_image_url,public_metrics,description,verified', {
       headers: {
@@ -81,6 +113,13 @@ export async function POST(request: NextRequest) {
     });
 
     const userData = await userResponse.json();
+
+    console.log('Twitter user data response:', {
+      ok: userResponse.ok,
+      status: userResponse.status,
+      hasData: !!userData.data,
+      error: userData.title || userData.detail
+    });
 
     if (!userResponse.ok) {
       console.error('Twitter user data error:', userData);
@@ -115,7 +154,7 @@ export async function POST(request: NextRequest) {
     //   }
     // });
 
-    console.log('Twitter user authenticated:', user.username);
+    console.log('Twitter user authenticated successfully:', user.username);
 
     return NextResponse.json({
       user: user,

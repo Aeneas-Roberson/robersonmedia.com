@@ -7,7 +7,19 @@ function TwitterLoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [userInfo, setUserInfo] = useState<any>(null);
   const [error, setError] = useState<string>("");
+  const [clientInfo, setClientInfo] = useState({
+    redirectUri: '',
+    currentUrl: ''
+  });
   const searchParams = useSearchParams();
+
+  // Handle client-side values to avoid hydration mismatch
+  useEffect(() => {
+    setClientInfo({
+      redirectUri: `${window.location.origin}/twitter/callback`,
+      currentUrl: window.location.href
+    });
+  }, []);
 
   // Handle callback results from the callback page
   useEffect(() => {
@@ -79,19 +91,36 @@ function TwitterLoginContent() {
       return;
     }
 
-    // Generate PKCE values
-    const codeVerifier = generateCodeVerifier();
-    const codeChallenge = await generateCodeChallenge(codeVerifier);
-    const state = generateState();
-    
-    // Store values for callback
-    sessionStorage.setItem('twitter_code_verifier', codeVerifier);
-    sessionStorage.setItem('twitter_oauth_state', state);
-    
-    const authUrl = `https://twitter.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
-    
-    console.log('Generated auth URL:', authUrl);
-    window.location.href = authUrl;
+    setIsLoading(true);
+
+    try {
+      // Generate PKCE values
+      const codeVerifier = generateCodeVerifier();
+      const codeChallenge = await generateCodeChallenge(codeVerifier);
+      const state = generateState();
+      
+      // Store values for callback
+      sessionStorage.setItem('twitter_code_verifier', codeVerifier);
+      sessionStorage.setItem('twitter_oauth_state', state);
+      
+      // Fix: Use the correct Twitter OAuth 2.0 authorization endpoint
+      const authUrl = `https://x.com/i/oauth2/authorize?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+      
+      console.log('Generated auth URL:', authUrl);
+      console.log('Client ID:', clientId);
+      console.log('Redirect URI:', decodeURIComponent(redirectUri));
+      console.log('Scope:', decodeURIComponent(scope));
+      
+      // Add a small delay before redirect to ensure storage is set
+      setTimeout(() => {
+        window.location.href = authUrl;
+      }, 100);
+      
+    } catch (error) {
+      console.error('Error generating auth URL:', error);
+      setError('Failed to generate authentication URL. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   const handleLogout = () => {
@@ -203,52 +232,52 @@ function TwitterLoginContent() {
               </div>
             )}
 
-            {/* Login State */}
+            {/* Login State - Not Logged In */}
             {!userInfo && !isLoading && !error && (
               <div className="text-center">
-                <p className="text-gray-300 text-lg mb-8">
-                  Authorize our application to access your Twitter account for automated posting and content management.
-                </p>
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-white mb-4">Login to Twitter</h3>
+                  <p className="text-gray-300 mb-6">
+                    Connect your Twitter account to access API features and manage your tweets.
+                  </p>
+                </div>
 
-                <div className="space-y-6">
-                  <button
-                    onClick={handleLogin}
-                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white font-semibold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-cyan-500/25"
-                  >
-                    Connect Twitter Account
-                  </button>
-
-                  <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
-                    <h4 className="text-blue-400 font-semibold mb-2">Features:</h4>
-                    <ul className="text-gray-400 text-sm space-y-1">
-                      <li>• Post tweets and media content</li>
-                      <li>• Read user timeline and metrics</li>
-                      <li>• Access account information</li>
-                      <li>• Manage Twitter content</li>
-                    </ul>
-                  </div>
-
-                  <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-4">
-                    <h4 className="text-yellow-400 font-semibold mb-2">OAuth 2.0 with PKCE:</h4>
-                    <p className="text-gray-400 text-sm font-mono">
-                      {`${window.location.origin}/twitter/callback`}
-                    </p>
-                    <p className="text-gray-400 text-xs mt-2">
-                      ✓ Secure PKCE flow implemented
-                    </p>
+                {/* Debug Information */}
+                <div className="mb-6 p-4 bg-gray-800/50 rounded-lg border border-gray-600">
+                  <h4 className="text-sm font-semibold text-gray-300 mb-2">Debug Information:</h4>
+                  <div className="text-xs text-gray-400 space-y-1">
+                    <div>Client ID: {process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID ? 
+                      `${process.env.NEXT_PUBLIC_TWITTER_CLIENT_ID.substring(0, 8)}...` : 
+                      'Not configured'
+                    }</div>
+                    <div>Redirect URI: {clientInfo.redirectUri || 'Loading...'}</div>
+                    <div>Current URL: {clientInfo.currentUrl || 'Loading...'}</div>
                   </div>
                 </div>
 
-                <p className="text-gray-400 text-sm mt-8">
-                  By connecting your account, you agree to our{" "}
-                  <a href="/twitter/privacy-policy" className="text-cyan-400 hover:text-cyan-300 underline">
-                    Privacy Policy
-                  </a>{" "}
-                  and{" "}
-                  <a href="/twitter/terms-of-service" className="text-cyan-400 hover:text-cyan-300 underline">
-                    Terms of Service
-                  </a>
-                </p>
+                <button
+                  onClick={handleLogin}
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 disabled:from-gray-600 disabled:to-gray-700 text-white font-semibold py-3 px-8 rounded-lg transition-all duration-300 flex items-center justify-center mx-auto"
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
+                      Redirecting to Twitter...
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5 mr-3" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                      Connect with Twitter
+                    </>
+                  )}
+                </button>
+
+                <div className="mt-4 text-sm text-gray-400">
+                  <p>By connecting, you agree to our <a href="/twitter/privacy-policy" className="text-cyan-400 hover:underline">Privacy Policy</a> and <a href="/twitter/terms-of-service" className="text-cyan-400 hover:underline">Terms of Service</a></p>
+                </div>
               </div>
             )}
           </div>
