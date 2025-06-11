@@ -42,9 +42,10 @@ function InstagramLoginContent() {
   }, [searchParams]);
 
   const handleLogin = () => {
-    const clientId = process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID;
+    const clientId = process.env.NEXT_PUBLIC_INSTAGRAM_CLIENT_ID; // This should be 996082560734538
     const redirectUri = encodeURIComponent(`${window.location.origin}/instagram/callback`);
-    const scope = encodeURIComponent('instagram_basic,pages_show_list,instagram_content_publish,business_management,instagram_manage_messages,instagram_manage_comments,instagram_manage_insights,pages_read_engagement');
+    // Scopes from the provided embed URL
+    const scope = encodeURIComponent('instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish,instagram_business_manage_insights');
     
     // Debug logging
     console.log('Client ID from env:', clientId);
@@ -55,9 +56,10 @@ function InstagramLoginContent() {
       return;
     }
     
-    const authUrl = `https://www.facebook.com/v23.0/dialog/oauth?client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
+    // Reverted authUrl to the Instagram-hosted dialog from the embed link
+    const authUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${clientId}&redirect_uri=${redirectUri}&scope=${scope}&response_type=code`;
     
-    console.log('Generated auth URL:', authUrl);
+    console.log('Generated auth URL (Instagram Embed):', authUrl);
     window.location.href = authUrl;
   };
 
